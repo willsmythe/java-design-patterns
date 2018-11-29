@@ -1,0 +1,32 @@
+pool:
+  vmImage: 'Ubuntu 16.04'
+
+variables:
+  DISPLAY: ':10'
+
+steps:
+- script: |
+    sudo cp .azure-pipelines/xvfb.init /etc/init.d/xvfb
+    sudo chmod +x /etc/init.d/xvfb
+    sudo update-rc.d xvfb defaults
+    sudo service xvfb start
+
+- task: SonarSource.sonarcloud.14d9cde6-c1da-4d55-aa01-2965cd301255.SonarCloudPrepare@1
+  displayName: 'Prepare analysis on SonarCloud'
+  inputs:
+    SonarCloud: 'java-design-patterns'
+    organization: 'willsmythe-github'
+    scannerMode: Other
+
+- task: Maven@3
+  inputs:
+    options: '-Dsonar.projectKey=java-design-patterns'
+    mavenPomFile: 'pom.xml'
+    mavenOpts: '-Xmx3072m'
+    publishJUnitResults: true
+    testResultsFiles: '**/TEST-*.xml'
+    sonarQubeRunAnalysis: true
+    goals: 'test'
+
+- task: SonarSource.sonarcloud.38b27399-a642-40af-bb7d-9971f69712e8.SonarCloudPublish@1
+  displayName: 'Publish Quality Gate Result'

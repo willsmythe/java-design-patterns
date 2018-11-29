@@ -1,0 +1,20 @@
+pool:
+  vmImage: 'Ubuntu 16.04'
+
+variables:
+  DISPLAY: ':10'
+
+steps:
+- script: |
+    sudo cp ./azure-pipelines/xvfb.init /etc/init.d/xvfb
+    sudo chmod +x /etc/init.d/xvfb
+    sudo update-rc.d xvfb defaults
+    sudo service xvfb start
+
+- task: Maven@3
+  inputs:
+    mavenPomFile: 'pom.xml'
+    mavenOpts: '-Xmx3072m'
+    publishJUnitResults: true
+    testResultsFiles: '**/TEST-*.xml'
+    goals: 'test'

@@ -2,10 +2,14 @@ pool:
   vmImage: 'Ubuntu 16.04'
 
 steps:
+- script: |
+    export DISPLAY=:99.0
+    sh -e /etc/init.d/xvfb start
+
 - task: Maven@3
   inputs:
     mavenPomFile: 'pom.xml'
-    mavenOptions: '-Xmx3072m'
-    publishJUnitResults: false
+    mavenOpts: '-Xmx3072m'
+    publishJUnitResults: true
     testResultsFiles: '**/TEST-*.xml'
     goals: 'test'
